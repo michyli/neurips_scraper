@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Paper Trails - Conference Paper Explorer</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .search-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        margin-bottom: 30px;
+      }
+
+      .search-box {
+        position: relative;
+        margin-bottom: 25px;
+      }
+
+      #searchInput {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 1.1em;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      #searchInput:focus {
+        border-color: #667eea;
+      }
+
+      .conference-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .conf-btn {
+        padding: 12px 24px;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: 600;
+        transition: all 0.3s;
+        flex: 0 1 auto;
+      }
+
+      .conf-btn:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .conf-btn.active {
+        background: #667eea;
+        color: white;
+      }
+
+      .search-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s;
+      }
+
+      .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .search-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .results-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        display: none;
+      }
+
+      .results-section.show {
+        display: block;
+      }
+
+      .results-header {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .results-count {
+        color: #667eea;
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+
+      .paper-card {
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        transition: all 0.3s;
+      }
+
+      .paper-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .paper-title {
+        font-size: 1.3em;
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .paper-authors {
+        color: #666;
+        margin-bottom: 8px;
+      }
+
+      .paper-conference {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #f0f0f0;
+        border-radius: 15px;
+        font-size: 0.9em;
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .paper-abstract {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+
+      .paper-links {
+        display: flex;
+        gap: 10px;
+      }
+
+      .paper-link {
+        padding: 8px 16px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 0.9em;
+        transition: all 0.3s;
+      }
+
+      .paper-link:hover {
+        background: #764ba2;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #667eea;
+        font-size: 1.2em;
+      }
+
+      .error {
+        background: #ffe5e5;
+        color: #cc0000;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .year-selector {
+        margin-bottom: 20px;
+      }
+
+      .year-selector label {
+        margin-right: 10px;
+        font-weight: 600;
+      }
+
+      .year-selector select {
+        padding: 8px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>AI Paper Trails</h1>
+        <p class="subtitle">Explore papers from top AI/ML/NLP conferences</p>
+      </header>
+
+      <div class="search-section">
+        <div class="search-box">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search papers by title, author, or keywords..."
+          />
+        </div>
+
+        <div class="year-selector">
+          <label for="yearSelect">Year:</label>
+          <select id="yearSelect">
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+          </select>
+        </div>
+
+        <div class="conference-buttons">
+          <button class="conf-btn" data-conf="neurips">NeurIPS</button>
+          <button class="conf-btn" data-conf="icml">ICML</button>
+          <button class="conf-btn" data-conf="iclr">ICLR</button>
+          <button class="conf-btn" data-conf="acl">ACL</button>
+          <button class="conf-btn" data-conf="emnlp">EMNLP</button>
+          <button class="conf-btn" data-conf="naacl">NAACL</button>
+          <button class="conf-btn" data-conf="eacl">EACL</button>
+          <button class="conf-btn" data-conf="coling">COLING</button>
+        </div>
+
+        <button class="search-btn" id="searchBtn">Search Papers</button>
+      </div>
+
+      <div class="results-section" id="resultsSection">
+        <div class="results-header">
+          <div class="results-count" id="resultsCount"></div>
+        </div>
+        <div id="resultsContainer"></div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:8000";
+      let selectedConference = null;
+
+      // Conference button click handlers
+      document.querySelectorAll(".conf-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          // Toggle selection
+          if (btn.classList.contains("active")) {
+            btn.classList.remove("active");
+            selectedConference = null;
+          } else {
+            // Remove active from all buttons
+            document
+              .querySelectorAll(".conf-btn")
+              .forEach((b) => b.classList.remove("active"));
+            // Add active to clicked button
+            btn.classList.add("active");
+            selectedConference = btn.dataset.conf;
+          }
+        });
+      });
+
+      // Search button click handler
+      document
+        .getElementById("searchBtn")
+        .addEventListener("click", async () => {
+          const searchQuery = document
+            .getElementById("searchInput")
+            .value.trim();
+          const year = document.getElementById("yearSelect").value;
+          const searchBtn = document.getElementById("searchBtn");
+          const resultsSection = document.getElementById("resultsSection");
+          const resultsContainer = document.getElementById("resultsContainer");
+          const resultsCount = document.getElementById("resultsCount");
+
+          if (!selectedConference) {
+            alert("Please select a conference first");
+            return;
+          }
+
+          // Show loading
+          searchBtn.disabled = true;
+          searchBtn.textContent = "Searching...";
+          resultsSection.classList.add("show");
+          resultsContainer.innerHTML =
+            '<div class="loading">Loading papers...</div>';
+
+          try {
+            const url = `${API_URL}/papers/${selectedConference}/${year}?limit=20${
+              searchQuery ? "&search=" + encodeURIComponent(searchQuery) : ""
+            }`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Update results count
+            resultsCount.textContent = `Found ${data.count} papers from ${data.conference_name} ${year}`;
+
+            // Display results
+            if (data.papers.length === 0) {
+              resultsContainer.innerHTML =
+                '<p class="loading">No papers found. Try a different search or conference.</p>';
+            } else {
+              resultsContainer.innerHTML = data.papers
+                .map(
+                  (paper) => `
+                        <div class="paper-card">
+                            <div class="paper-conference">${
+                              data.conference_name
+                            } ${year}</div>
+                            <h3 class="paper-title">${
+                              paper.title || "Untitled"
+                            }</h3>
+                            <div class="paper-authors">
+                                ${
+                                  paper.authors && paper.authors.length > 0
+                                    ? paper.authors.slice(0, 5).join(", ") +
+                                      (paper.authors.length > 5
+                                        ? ", et al."
+                                        : "")
+                                    : "No authors listed"
+                                }
+                            </div>
+                            <div class="paper-abstract">
+                                ${
+                                  paper.abstract && paper.abstract !== "N/A"
+                                    ? paper.abstract.substring(0, 300) +
+                                      (paper.abstract.length > 300 ? "..." : "")
+                                    : "No abstract available"
+                                }
+                            </div>
+                            <div class="paper-links">
+                                ${
+                                  paper.pdf_url
+                                    ? `<a href="${paper.pdf_url}" target="_blank" class="paper-link">PDF</a>`
+                                    : ""
+                                }
+                                ${
+                                  paper.forum_url
+                                    ? `<a href="${paper.forum_url}" target="_blank" class="paper-link">OpenReview</a>`
+                                    : ""
+                                }
+                                ${
+                                  paper.anthology_url
+                                    ? `<a href="${paper.anthology_url}" target="_blank" class="paper-link">ACL Anthology</a>`
+                                    : ""
+                                }
+                            </div>
+                        </div>
+                    `
+                )
+                .join("");
+            }
+          } catch (error) {
+            resultsContainer.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                        <br><br>
+                        Make sure the API server is running on ${API_URL}
+                    </div>
+                `;
+          } finally {
+            searchBtn.disabled = false;
+            searchBtn.textContent = "Search Papers";
+          }
+        });
+
+      // Allow Enter key to trigger search
+      document
+        .getElementById("searchInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter" && selectedConference) {
+            document.getElementById("searchBtn").click();
+          }
+        });
+    </script>
+  </body>
+</html>
