@@ -47,6 +47,7 @@ class ConferenceScraper:
     def __init__(self, max_retries: int = 3, backoff_factor: float = 1.0):
         self.base_url = "https://api2.openreview.net"
         self.session = requests.Session()
+        self._cache = {}  # Simple in-memory cache for repeated queries
         
         # Configure retry strategy for rate limiting and transient errors
         retry_strategy = Retry(
@@ -142,46 +143,63 @@ class ConferenceScraper:
             logger.error(f"Failed to parse JSON response from {venue_id}: {e}")
             return []
     
-    def get_conference_papers(self, conference: str, year: int, limit: int = 100, fetch_all: bool = False) -> List[Dict]:
+    def get_conference_papers(self, conference: str, year: int, limit: int = 100, fetch_all: bool = False, search_query: Optional[str] = None) -> List[Dict]:
         """
-        Fetch papers from a conference year
+        Fetch papers from a conference year with optional search filtering
         
         Args:
             conference: Conference name (e.g., 'neurips', 'icml')
             year: Conference year
             limit: Maximum total number of papers to fetch (default 100)
             fetch_all: If True, fetch all papers ignoring limit
+            search_query: Optional search query to filter papers by title/abstract/authors
             
         Returns:
-            List of paper dictionaries
+            List of paper dictionaries (raw or filtered)
         """
         venue_id = self.get_venue_id(conference, year)
         if not venue_id:
             return []
+        
+        # If we have a search query, fetch more papers and filter
+        # This is more efficient than fetching ALL papers
+        if search_query and not fetch_all:
+            fetch_limit = min(limit * 5, 500)  # Fetch 5x limit or max 500
+            papers = self.get_venue_submissions(venue_id, limit=fetch_limit, offset=0)
+            # Filter papers
+            filtered = self._filter_papers(papers, search_query)
+            return filtered[:limit]
         
         if not fetch_all:
             # Simple case: just fetch the requested number
             return self.get_venue_submissions(venue_id, limit=limit, offset=0)
         
         # Fetch all papers with pagination
+        logger.info(f"Starting to fetch ALL papers from {venue_id} with pagination...")
         all_papers = []
         offset = 0
         batch_size = 1000  # OpenReview max per request
+        batch_num = 1
         
         while True:
+            logger.info(f"Fetching batch {batch_num} (offset: {offset}, batch_size: {batch_size})...")
             papers = self.get_venue_submissions(venue_id, limit=batch_size, offset=offset)
             if not papers:
+                logger.info(f"No more papers found. Pagination complete.")
                 break
             
             all_papers.extend(papers)
-            logger.info(f"Total papers fetched: {len(all_papers)}")
+            logger.info(f"✓ Batch {batch_num} complete: fetched {len(papers)} papers. Total so far: {len(all_papers)}")
             
             if len(papers) < batch_size:
                 # Reached the end
+                logger.info(f"Last batch was smaller ({len(papers)} < {batch_size}). Reached end of conference.")
                 break
             
             offset += batch_size
+            batch_num += 1
         
+        logger.info(f"✓ COMPLETED: Fetched total of {len(all_papers)} papers from {venue_id}")
         return all_papers
     
     def get_paper_details(self, paper_id: str) -> Optional[Dict]:
@@ -249,6 +267,51 @@ class ConferenceScraper:
                 name = name[:-len(suffix)].strip()
         
         return name.strip()
+    
+    def _filter_papers(self, papers: List[Dict], search_query: str) -> List[Dict]:
+        """
+        Filter papers by search query (case-insensitive search in title, abstract, authors)
+        
+        Args:
+            papers: List of raw paper dictionaries
+            search_query: Search string
+            
+        Returns:
+            Filtered list of papers
+        """
+        if not search_query:
+            return papers
+        
+        search_lower = search_query.lower()
+        filtered = []
+        
+        for paper in papers:
+            try:
+                content = paper.get('content', {})
+                
+                # Search in title
+                title = content.get('title', {}).get('value', '') if isinstance(content.get('title'), dict) else content.get('title', '')
+                if search_lower in title.lower():
+                    filtered.append(paper)
+                    continue
+                
+                # Search in abstract
+                abstract = content.get('abstract', {}).get('value', '') if isinstance(content.get('abstract'), dict) else content.get('abstract', '')
+                if search_lower in abstract.lower():
+                    filtered.append(paper)
+                    continue
+                
+                # Search in authors
+                authors = content.get('authors', {}).get('value', []) if isinstance(content.get('authors'), dict) else content.get('authors', [])
+                if any(search_lower in author.lower() for author in authors):
+                    filtered.append(paper)
+                    continue
+                    
+            except (AttributeError, TypeError):
+                continue
+        
+        logger.info(f"Filtered {len(filtered)} papers from {len(papers)} using query '{search_query}'")
+        return filtered
     
     def extract_paper_info(self, paper: Dict, conference: str = None) -> Dict:
         """

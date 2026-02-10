@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Paper Trails - 3D Visualization</title>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            overflow: hidden;
+        }
+
+        #header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 15px 20px;
+            z-index: 1000;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            color: #667eea;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .back-btn:hover {
+            background: #764ba2;
+        }
+
+        #controls {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            z-index: 999;
+            border: 1px solid #667eea;
+        }
+
+        #sidebar {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            bottom: 20px;
+            width: 350px;
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 999;
+            border: 1px solid #667eea;
+            display: none;
+        }
+
+        #sidebar.show {
+            display: block;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #667eea;
+            background: #2d2d44;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .paper-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .paper-authors {
+            font-size: 0.9em;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .paper-abstract {
+            font-size: 0.85em;
+            line-height: 1.5;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .paper-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .keyword-tag {
+            padding: 4px 10px;
+            background: #667eea;
+            border-radius: 12px;
+            font-size: 0.75em;
+        }
+
+        .recommendations {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #667eea;
+        }
+
+        .recommendations h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .rec-paper {
+            padding: 10px;
+            background: #2d2d44;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .rec-paper:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .rec-paper-title {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .rec-paper-similarity {
+            font-size: 0.75em;
+            color: #aaa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .stats {
+            background: #2d2d44;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .stat-label {
+            color: #aaa;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        #graph {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .legend {
+            background: #2d2d44;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .legend-title {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>🌌 Paper Network Visualization</h1>
+        <a href="index.html" class="back-btn">← Back to Search</a>
+    </div>
+
+    <div id="controls">
+        <div class="control-group">
+            <label for="conferenceSelect">Conference:</label>
+            <select id="conferenceSelect">
+                <option value="">Select a conference...</option>
+                <option value="neurips">NeurIPS</option>
+                <option value="icml">ICML</option>
+                <option value="iclr">ICLR</option>
+                <option value="acl">ACL</option>
+                <option value="emnlp">EMNLP</option>
+                <option value="naacl">NAACL</option>
+                <option value="eacl">EACL</option>
+                <option value="coling">COLING</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="yearSelect">Year:</label>
+            <select id="yearSelect">
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="limitSelect">Number of Papers:</label>
+            <select id="limitSelect">
+                <option value="20">20</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1,000</option>
+                <option value="all">All Papers</option>
+            </select>
+        </div>
+
+        <button id="loadBtn">Load Visualization</button>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-row">
+                <span class="stat-label">Papers:</span>
+                <span class="stat-value" id="statPapers">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Connections:</span>
+                <span class="stat-value" id="statLinks">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Clusters:</span>
+                <span class="stat-value" id="statClusters">0</span>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-title">Topic Colors</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff6b6b;"></div>
+                <span>Computer Vision</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4ecdc4;"></div>
+                <span>NLP / Language</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #95e1d3;"></div>
+                <span>Reinforcement Learning</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f38181;"></div>
+                <span>Graph / Network</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #feca57;"></div>
+                <span>Generative Models</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #667eea;"></div>
+                <span>Other Topics</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div id="paperDetails"></div>
+    </div>
+
+    <div id="graph"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentGraph = null;
+        let papersData = [];
+        let graphData = { nodes: [], links: [] };
+
+        console.log('Page loaded. THREE.js available:', typeof THREE !== 'undefined');
+        console.log('ForceGraph3D available:', typeof ForceGraph3D !== 'undefined');
+
+        // Fetch with timeout helper
+        async function fetchWithTimeout(url, timeout = 120000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error(`Request timeout after ${timeout / 1000} seconds. Try a smaller number of papers.`);
+                }
+                throw error;
+            }
+        }
+
+        // Calculate similarity between two papers
+        function calculateSimilarity(paper1, paper2) {
+            let score = 0;
+            
+            // Keyword overlap (weight: 0.5)
+            const kw1 = new Set(paper1.keywords || []);
+            const kw2 = new Set(paper2.keywords || []);
+            const kwIntersection = [...kw1].filter(x => kw2.has(x));
+            const kwUnion = new Set([...kw1, ...kw2]);
+            if (kwUnion.size > 0) {
+                score += (kwIntersection.length / kwUnion.size) * 0.5;
+            }
+
+            // Author overlap (weight: 0.2)
+            const auth1 = new Set(paper1.authors || []);
+            const auth2 = new Set(paper2.authors || []);
+            const authIntersection = [...auth1].filter(x => auth2.has(x));
+            if (authIntersection.length > 0) {
+                score += 0.2;
+            }
+
+            // Abstract text similarity (weight: 0.3)
+            if (paper1.abstract && paper2.abstract) {
+                const words1 = new Set(paper1.abstract.toLowerCase().split(/\s+/).filter(w => w.length > 4));
+                const words2 = new Set(paper2.abstract.toLowerCase().split(/\s+/).filter(w => w.length > 4));
+                const wordIntersection = [...words1].filter(x => words2.has(x));
+                const wordUnion = new Set([...words1, ...words2]);
+                if (wordUnion.size > 0) {
+                    score += (wordIntersection.length / wordUnion.size) * 0.3;
+                }
+            }
+
+            return score;
+        }
+
+        // Build graph from papers
+        function buildGraph(papers) {
+            console.log('📊 Building graph from', papers.length, 'papers...');
+            
+            console.log('🔵 Step 1/3: Creating nodes...');
+            const nodes = papers.map((paper, i) => ({
+                id: i,
+                name: paper.title || 'Untitled',
+                val: 8,
+                color: getColorForPaper(paper),
+                paper: paper
+            }));
+            console.log('✓ Created', nodes.length, 'nodes');
+
+            console.log('🔗 Step 2/3: Calculating similarities and creating links...');
+            const links = [];
+            const threshold = 0.05; // Lowered threshold for more connections
+            const totalComparisons = (papers.length * (papers.length - 1)) / 2;
+            let comparisons = 0;
+            const progressInterval = Math.floor(totalComparisons / 10); // Log every 10%
+
+            for (let i = 0; i < papers.length; i++) {
+                for (let j = i + 1; j < papers.length; j++) {
+                    const similarity = calculateSimilarity(papers[i], papers[j]);
+                    if (similarity > threshold) {
+                        links.push({
+                            source: i,
+                            target: j,
+                            value: similarity
+                        });
+                    }
+                    comparisons++;
+                    
+                    // Log progress every 10%
+                    if (comparisons % progressInterval === 0 || comparisons === totalComparisons) {
+                        const percent = Math.round((comparisons / totalComparisons) * 100);
+                        console.log(`   Progress: ${percent}% (${comparisons}/${totalComparisons} comparisons, ${links.length} links found)`);
+                    }
+                }
+            }
+
+            console.log('✓ Created', links.length, 'links from', comparisons, 'comparisons');
+            
+            // Log some similarity scores for debugging
+            if (links.length > 0) {
+                console.log('Sample link similarities:', links.slice(0, 5).map(l => l.value.toFixed(3)));
+            } else {
+                console.log('WARNING: No links created! Papers may not have enough similarity.');
+            }
+            
+            return { nodes, links };
+        }
+
+        // Get color based on keywords
+        function getColorForPaper(paper) {
+            if (!paper.keywords || paper.keywords.length === 0) {
+                return '#888888';
+            }
+
+            const keywords = paper.keywords.map(k => k.toLowerCase());
+            
+            // Color coding based on primary topics
+            if (keywords.some(k => k.includes('vision') || k.includes('image') || k.includes('visual'))) {
+                return '#ff6b6b'; // Red for vision
+            }
+            if (keywords.some(k => k.includes('nlp') || k.includes('language') || k.includes('text'))) {
+                return '#4ecdc4'; // Cyan for NLP
+            }
+            if (keywords.some(k => k.includes('reinforce') || k.includes('rl') || k.includes('agent'))) {
+                return '#95e1d3'; // Green for RL
+            }
+            if (keywords.some(k => k.includes('graph') || k.includes('network'))) {
+                return '#f38181'; // Pink for graphs
+            }
+            if (keywords.some(k => k.includes('generation') || k.includes('generative'))) {
+                return '#feca57'; // Yellow for generation
+            }
+            
+            return '#667eea'; // Default purple
+        }
+
+        // Get top similar papers
+        function getSimilarPapers(targetPaper, allPapers, topN = 5) {
+            const similarities = allPapers
+                .filter(p => p !== targetPaper)
+                .map(p => ({
+                    paper: p,
+                    similarity: calculateSimilarity(targetPaper, p)
+                }))
+                .filter(s => s.similarity > 0)
+                .sort((a, b) => b.similarity - a.similarity)
+                .slice(0, topN);
+
+            return similarities;
+        }
+
+        // Display paper details
+        function showPaperDetails(node) {
+            const paper = node.paper;
+            const sidebar = document.getElementById('sidebar');
+            const detailsDiv = document.getElementById('paperDetails');
+
+            const authors = (paper.authors || []).slice(0, 5).join(', ');
+            const keywords = paper.keywords || [];
+            const abstract = paper.abstract && paper.abstract !== 'N/A' 
+                ? paper.abstract.substring(0, 300) + (paper.abstract.length > 300 ? '...' : '')
+                : 'No abstract available';
+
+            // Get similar papers
+            const similarPapers = getSimilarPapers(paper, papersData);
+
+            let html = `
+                <div class="paper-title">${paper.title || 'Untitled'}</div>
+                <div class="paper-authors">${authors}${(paper.authors || []).length > 5 ? ', et al.' : ''}</div>
+                ${keywords.length > 0 ? `
+                <div class="paper-keywords">
+                    ${keywords.slice(0, 6).map(kw => `<span class="keyword-tag">${kw}</span>`).join('')}
+                </div>
+                ` : ''}
+                <div class="paper-abstract">${abstract}</div>
+            `;
+
+            if (paper.pdf_url || paper.forum_url || paper.anthology_url) {
+                html += '<div style="margin-bottom: 15px;">';
+                if (paper.pdf_url) {
+                    html += `<a href="${paper.pdf_url}" target="_blank" rel="noopener noreferrer" style="color: #667eea; margin-right: 10px;">📄 PDF</a>`;
+                }
+                if (paper.forum_url) {
+                    html += `<a href="${paper.forum_url}" target="_blank" rel="noopener noreferrer" style="color: #667eea; margin-right: 10px;">💬 Forum</a>`;
+                }
+                if (paper.anthology_url) {
+                    html += `<a href="${paper.anthology_url}" target="_blank" rel="noopener noreferrer" style="color: #667eea;">📚 Anthology</a>`;
+                }
+                html += '</div>';
+            }
+
+            if (similarPapers.length > 0) {
+                html += `
+                    <div class="recommendations">
+                        <h3>💡 You might also like</h3>
+                        ${similarPapers.map((sim, idx) => `
+                            <div class="rec-paper" data-node-id="${papersData.indexOf(sim.paper)}">
+                                <div class="rec-paper-title">${idx + 1}. ${sim.paper.title || 'Untitled'}</div>
+                                <div class="rec-paper-similarity">${(sim.similarity * 100).toFixed(0)}% similarity</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            detailsDiv.innerHTML = html;
+            sidebar.classList.add('show');
+
+            // Add click handlers for recommendations
+            document.querySelectorAll('.rec-paper').forEach(recDiv => {
+                recDiv.addEventListener('click', () => {
+                    const nodeId = parseInt(recDiv.dataset.nodeId);
+                    const node = graphData.nodes[nodeId];
+                    if (node && currentGraph) {
+                        currentGraph.cameraPosition(
+                            { x: node.x, y: node.y, z: node.z + 200 },
+                            node,
+                            1000
+                        );
+                        showPaperDetails(node);
+                    }
+                });
+            });
+        }
+
+        // Load and visualize data
+        document.getElementById('loadBtn').addEventListener('click', async () => {
+            const conference = document.getElementById('conferenceSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            const limitValue = document.getElementById('limitSelect').value;
+            const loadBtn = document.getElementById('loadBtn');
+
+            if (!conference) {
+                alert('Please select a conference');
+                return;
+            }
+
+            console.log('Loading papers:', conference, year, limitValue);
+
+            loadBtn.disabled = true;
+            
+            // Build URL based on whether user selected "All Papers"
+            let url;
+            if (limitValue === 'all') {
+                loadBtn.textContent = 'Loading All Papers (this may take a while)...';
+                url = `${API_URL}/papers/${conference}/${year}?fetch_all=true`;
+            } else {
+                loadBtn.textContent = 'Loading...';
+                url = `${API_URL}/papers/${conference}/${year}?limit=${limitValue}`;
+            }
+            
+            document.getElementById('sidebar').classList.remove('show');
+
+            try {
+                console.log('Fetching from:', url);
+                
+                // Use longer timeout for large requests (2 minutes)
+                const timeout = limitValue === 'all' ? 180000 : 120000;
+                const response = await fetchWithTimeout(url, timeout);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`Failed to fetch papers: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                papersData = data.papers;
+
+                if (!papersData || papersData.length === 0) {
+                    alert('No papers found for this selection');
+                    return;
+                }
+
+                console.log('✓ Papers data loaded:', papersData.length, 'papers');
+
+                // Build graph
+                console.log('🔨 Building graph structure...');
+                graphData = buildGraph(papersData);
+
+                console.log('✓ Graph data ready:', graphData.nodes.length, 'nodes,', graphData.links.length, 'links');
+
+                // Update stats
+                document.getElementById('stats').style.display = 'block';
+                document.getElementById('statPapers').textContent = graphData.nodes.length;
+                document.getElementById('statLinks').textContent = graphData.links.length;
+                
+                // Estimate clusters
+                const clusters = estimateClusters(graphData);
+                document.getElementById('statClusters').textContent = clusters;
+
+                // Create or update graph
+                console.log('🎨 Step 3/3: Rendering 3D visualization...');
+                
+                if (!currentGraph) {
+                    console.log('⚙️ Initializing ForceGraph3D engine...');
+                    currentGraph = ForceGraph3D()(document.getElementById('graph'))
+                        .graphData(graphData)
+                        .nodeLabel(node => node.name)
+                        .nodeColor(node => node.color)
+                        .nodeVal(node => node.val)
+                        .nodeRelSize(8)
+                        .linkColor(() => 'rgba(100,180,255,0.6)')  // Brighter blue
+                        .linkWidth(link => Math.max(link.value * 3, 1))  // Thicker links
+                        .linkOpacity(0.8)  // More opaque
+                        .linkDirectionalParticles(2)  // Add animated particles
+                        .linkDirectionalParticleWidth(2)
+                        .onNodeClick(node => {
+                            console.log('Node clicked:', node);
+                            showPaperDetails(node);
+                        });
+                    console.log('✓ ForceGraph3D initialized with', graphData.links.length, 'links');
+                } else {
+                    console.log('⚙️ Updating existing graph...');
+                    currentGraph.graphData(graphData);
+                }
+
+                console.log('✅ VISUALIZATION COMPLETE! You can now interact with the graph.');
+
+            } catch (error) {
+                console.error('Error loading papers:', error);
+                
+                let errorMsg = error.message;
+                if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                    errorMsg = 'Network error. Please check:\n1. API server is running on port 8000\n2. No CORS issues\n3. Try a smaller number of papers';
+                }
+                
+                alert('Error loading papers:\n' + errorMsg);
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.textContent = 'Load Visualization';
+            }
+        });
+
+        // Estimate number of clusters
+        function estimateClusters(graph) {
+            if (graph.links.length === 0) return graph.nodes.length;
+            
+            const visited = new Set();
+            let clusters = 0;
+
+            function dfs(nodeId) {
+                if (visited.has(nodeId)) return;
+                visited.add(nodeId);
+                
+                graph.links.forEach(link => {
+                    if (link.source.id === nodeId || link.source === nodeId) {
+                        const target = typeof link.target === 'object' ? link.target.id : link.target;
+                        dfs(target);
+                    }
+                    if (link.target.id === nodeId || link.target === nodeId) {
+                        const source = typeof link.source === 'object' ? link.source.id : link.source;
+                        dfs(source);
+                    }
+                });
+            }
+
+            graph.nodes.forEach(node => {
+                if (!visited.has(node.id)) {
+                    dfs(node.id);
+                    clusters++;
+                }
+            });
+
+            return clusters;
+        }
+    </script>
+</body>
+</html>

@@ -33,10 +33,31 @@ Then visit `http://localhost:3000`
 
 ### 4. Using the Interface
 
-1. **Select a Conference** - Click one of the conference buttons (NeurIPS, ICML, ICLR, ACL, EMNLP, etc.)
-2. **Choose a Year** - Select the year from the dropdown (2024, 2023, 2022, 2021)
-3. **Optional: Enter Search Query** - Type keywords to filter papers
-4. **Click "Search Papers"** - View results below
+**Two Modes:**
+
+- **🔍 Search Mode** - Find specific papers by keyword
+- **📚 Browse Mode** - Explore recent papers without searching
+
+**Search Mode:**
+
+1. **Enter Search Query** - Type keywords for title, author, or topics
+2. **Select Conference** - Click one of the conference buttons
+3. **Choose Year** - Select from dropdown (2024, 2023, 2022, 2021)
+4. **Click "Search Papers"** - View filtered results
+
+**Browse Mode:**
+
+1. **Click "📚 Browse"** toggle at top
+2. **Select Conference** - Papers load automatically!
+3. **Choose Year** - Select from dropdown
+4. **Explore** - Expand abstracts, view keywords, follow links
+
+**Features:**
+
+- ✨ Expandable abstracts (click "Show more")
+- 🏷️ Visual keyword tags for quick topic scanning
+- 📊 Statistics dashboard showing paper count and filters
+- 📄 Direct links to PDFs and conference pages
 
 ### Conference Buttons
 
@@ -95,14 +116,27 @@ GET /search?q=query&conference=neurips&year=2024
 
 ### Notes
 
-- First search for each conference may take 10-30 seconds as it fetches from the source
+- **Performance Optimized:** Search filtering happens at the scraper level for faster results
+- **Caching Enabled:** Repeated queries are cached for 5 minutes (instant results!)
+- First search for a conference/year takes 5-10 seconds; subsequent searches are instant
 - Results are limited to 20 papers by default for faster loading
 - Search is case-insensitive and searches title, abstract, and authors
-- Papers are fetched live from OpenReview API and ACL Anthology
+- Papers are fetched from OpenReview API and ACL Anthology with efficient filtering
+
+### Performance Optimizations
+
+This MVP includes several optimizations:
+
+- ✅ **Scraper-level filtering** - Search happens before loading all papers
+- ✅ **In-memory caching** - 5-minute cache for instant repeated queries
+- ✅ **Smart prefetching** - Fetches 3-5x limit to ensure enough search results
+
+See [`docs/OPTIMIZATIONS.md`](docs/OPTIMIZATIONS.md) for detailed technical information.
 
 ### Next Steps
 
-- Add database caching for faster repeated searches
-- Implement author pages and citation networks
+- Add PostgreSQL database for persistent storage and full-text search
+- Implement Redis for distributed caching
+- Add author pages and citation networks
 - Add visualization for paper trends
-- Deploy to production server
+- Deploy to production server with restricted CORS

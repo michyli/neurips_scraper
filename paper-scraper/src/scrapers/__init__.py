@@ -8,3 +8,4 @@ from .acl_scraper import ACLScraper
 
 __all__ = ['ConferenceScraper', 'ACLScraper']
 __version__ = '0.1.0'
+
