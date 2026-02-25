@@ -29,8 +29,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://YOUR-GITHUB-USERNAME.github.io",
-        "https://YOUR-APP.up.railway.app",
+        "https://michyli.github.io",
+        "https://neuripsscraper-production.up.railway.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
