@@ -112,8 +112,7 @@ class ConferenceScraper:
         logger.info(f"Fetching submissions for venue: {venue_id}, limit: {limit}, offset: {offset}")
         url = f"{self.base_url}/notes"
         params = {
-            'invitation': f'{venue_id}/-/Submission',
-            'details': 'replyCount,invitation,original',
+            'content.venueid': venue_id,
             'limit': limit,
             'offset': offset
         }
@@ -345,7 +344,7 @@ class ConferenceScraper:
                 'authors': normalized_authors,
                 'raw_authors': raw_authors,
                 'keywords': keywords,
-                'tldr': content.get('TL;DR', {}).get('value', 'N/A'),
+                'tldr': content.get('TLDR', content.get('TL;DR', {})).get('value', 'N/A'),
                 'pdf_url': f"https://openreview.net/pdf?id={paper_id}" if paper_id else None,
                 'forum_url': f"https://openreview.net/forum?id={paper_id}" if paper_id else None,
                 'created_time': datetime.fromtimestamp(paper.get('cdate', 0) / 1000).isoformat(),
