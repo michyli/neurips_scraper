@@ -28,7 +28,10 @@ app = FastAPI(
 # Example: allow_origins=["https://neurips.aipapertrails.com"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict to specific origins in production
+    allow_origins=[
+        "https://YOUR-GITHUB-USERNAME.github.io",
+        "https://YOUR-APP.up.railway.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
