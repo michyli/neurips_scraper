@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 import sys
 import os
+import hashlib
+import time
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,9 +22,11 @@ app = FastAPI(
 )
 
 # Configure CORS
+# WARNING: For production, restrict origins to your actual frontend domain
+# Example: allow_origins=["https://neurips.aipapertrails.com"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual origins
+    allow_origins=["*"],  # TODO: Restrict to specific origins in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,6 +35,11 @@ app.add_middleware(
 # Initialize scrapers
 openreview_scraper = ConferenceScraper()
 acl_scraper = ACLScraper()
+
+# Simple in-memory cache for API responses
+# Format: {cache_key: {"data": response, "timestamp": time}}
+api_cache = {}
+CACHE_TTL = 300  # 5 minutes cache
 
 # Conference configurations
 CONFERENCES = {
@@ -43,6 +52,32 @@ CONFERENCES = {
     "eacl": {"type": "acl", "name": "EACL", "full_name": "European Chapter of the ACL"},
     "coling": {"type": "acl", "name": "COLING", "full_name": "International Conference on Computational Linguistics"},
 }
+
+
+def get_cache_key(*args) -> str:
+    """Generate cache key from arguments"""
+    key_string = "_".join(str(arg) for arg in args if arg is not None)
+    return hashlib.md5(key_string.encode()).hexdigest()
+
+
+def get_from_cache(cache_key: str):
+    """Get data from cache if valid"""
+    if cache_key in api_cache:
+        cached = api_cache[cache_key]
+        if time.time() - cached["timestamp"] <= CACHE_TTL:
+            return cached["data"]
+        else:
+            # Remove expired entry
+            del api_cache[cache_key]
+    return None
+
+
+def save_to_cache(cache_key: str, data):
+    """Save data to cache"""
+    api_cache[cache_key] = {
+        "data": data,
+        "timestamp": time.time()
+    }
 
 
 @app.get("/")
@@ -75,8 +110,9 @@ def list_conferences():
 def get_papers(
     conference: str,
     year: int,
-    limit: int = Query(default=10, ge=1, le=100),
-    search: Optional[str] = None
+    limit: int = Query(default=10, ge=1, le=10000),  # Increased max to 10,000
+    search: Optional[str] = None,
+    fetch_all: bool = Query(default=False, description="Fetch all papers (ignores limit)")
 ):
     """
     Get papers from a specific conference and year
@@ -84,8 +120,9 @@ def get_papers(
     Args:
         conference: Conference ID (e.g., 'neurips', 'acl')
         year: Conference year
-        limit: Maximum number of papers to return
+        limit: Maximum number of papers to return (max 10,000, or use fetch_all=true)
         search: Optional search query to filter papers
+        fetch_all: If true, fetches all papers from the conference (ignores limit)
     """
     if conference not in CONFERENCES:
         raise HTTPException(
@@ -93,45 +130,64 @@ def get_papers(
             detail=f"Conference '{conference}' not found. Available: {list(CONFERENCES.keys())}"
         )
     
+    # Check cache first
+    cache_key = get_cache_key(conference, year, limit, search, fetch_all)
+    cached_result = get_from_cache(cache_key)
+    if cached_result is not None:
+        return cached_result
+    
     conf_info = CONFERENCES[conference]
+    
+    # Add logging imports if not present
+    import logging
+    logger = logging.getLogger(__name__)
     
     try:
         # Fetch papers based on conference type
+        # Search filtering is now done at scraper level for better performance
+        mode = "ALL PAPERS" if fetch_all else f"{limit} papers"
+        logger.info(f"📥 Starting request: {conference.upper()} {year} ({mode})")
+        
         if conf_info["type"] == "openreview":
+            logger.info(f"🔍 Fetching from OpenReview API...")
             papers = openreview_scraper.get_conference_papers(
                 conference,
                 year,
-                limit=limit
+                limit=limit,
+                fetch_all=fetch_all,  # Pass fetch_all parameter
+                search_query=search  # Pass search to scraper for efficient filtering
             )
             # Extract and normalize paper info
+            logger.info(f"📝 Processing {len(papers)} papers (extracting info)...")
             papers = [
                 openreview_scraper.extract_paper_info(paper, conference=conf_info["name"])
                 for paper in papers
             ]
+            logger.info(f"✓ Extraction complete!")
         else:  # ACL
+            logger.info(f"🔍 Fetching from ACL Anthology...")
+            # For ACL, if fetch_all is True, pass None as limit
+            acl_limit = None if fetch_all else limit
             papers = acl_scraper.get_conference_papers(
                 conference,
                 year,
-                limit=limit
+                limit=acl_limit,
+                search_query=search  # Pass search to scraper for efficient filtering
             )
+            logger.info(f"✓ ACL fetch complete!")
         
-        # Apply search filter if provided
-        if search and papers:
-            search_lower = search.lower()
-            papers = [
-                p for p in papers
-                if (search_lower in p.get('title', '').lower() or
-                    search_lower in p.get('abstract', '').lower() or
-                    any(search_lower in author.lower() for author in p.get('authors', [])))
-            ]
-        
-        return {
+        result = {
             "conference": conference,
             "conference_name": conf_info["name"],
             "year": year,
             "count": len(papers),
             "papers": papers
         }
+        
+        # Save to cache
+        save_to_cache(cache_key, result)
+        logger.info(f"✅ REQUEST COMPLETE: Returning {len(papers)} papers for {conference.upper()} {year}")
+        return result
         
     except Exception as e:
         raise HTTPException(
@@ -145,7 +201,7 @@ def search_papers(
     q: str = Query(..., min_length=1),
     conference: Optional[str] = None,
     year: Optional[int] = None,
-    limit: int = Query(default=20, ge=1, le=100)
+    limit: int = Query(default=100, ge=1, le=500)
 ):
     """
     Search papers across conferences
@@ -184,3 +240,4 @@ def search_papers(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

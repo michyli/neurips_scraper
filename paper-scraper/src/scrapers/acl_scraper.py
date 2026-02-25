@@ -196,7 +196,7 @@ class ACLScraper:
             # Extract pages
             pages_match = re.search(r'pages\s*=\s*["{](\d+)--(\d+)["}]', bibtex)
             if pages_match:
-                result['pages'] = f"{pages_match.group(1)}-{pages_match.group(2)}"
+                result['pages'] = f"{pages_match.group(2)}-{pages_match.group(1)}"
             
             # Extract DOI
             doi_match = re.search(r'doi\s*=\s*["{](.*?)["}]', bibtex)
@@ -298,14 +298,55 @@ class ACLScraper:
         
         return paper_info
     
-    def get_conference_papers(self, venue: str, year: int, limit: Optional[int] = None) -> List[Dict]:
+    def _filter_papers(self, papers: List[Dict], search_query: str) -> List[Dict]:
         """
-        Get all papers from a conference
+        Filter papers by search query (case-insensitive search in title, abstract, authors)
+        
+        Args:
+            papers: List of paper dictionaries
+            search_query: Search string
+            
+        Returns:
+            Filtered list of papers
+        """
+        if not search_query:
+            return papers
+        
+        search_lower = search_query.lower()
+        filtered = []
+        
+        for paper in papers:
+            try:
+                # Search in title
+                if search_lower in paper.get('title', '').lower():
+                    filtered.append(paper)
+                    continue
+                
+                # Search in abstract
+                if search_lower in paper.get('abstract', '').lower():
+                    filtered.append(paper)
+                    continue
+                
+                # Search in authors
+                authors = paper.get('authors', [])
+                if any(search_lower in author.lower() for author in authors):
+                    filtered.append(paper)
+                    continue
+                    
+            except (AttributeError, TypeError):
+                continue
+        
+        return filtered
+    
+    def get_conference_papers(self, venue: str, year: int, limit: Optional[int] = None, search_query: Optional[str] = None) -> List[Dict]:
+        """
+        Get all papers from a conference with optional search filtering
         
         Args:
             venue: Venue name (e.g., 'acl', 'emnlp')
             year: Conference year
             limit: Maximum number of papers to fetch (None for all)
+            search_query: Optional search query to filter papers by title/abstract/authors
             
         Returns:
             List of paper dictionaries
@@ -316,16 +357,32 @@ class ACLScraper:
             logger.warning(f"No papers found for {venue.upper()} {year}")
             return []
         
-        if limit:
-            paper_ids = paper_ids[:limit]
+        # If we have a search query, fetch more papers to ensure we get enough matches
+        fetch_limit = limit
+        if search_query and limit:
+            fetch_limit = min(limit * 2, len(paper_ids))  # Fetch 2x limit or all available
+            logger.info(f"Search query provided, fetching {fetch_limit} papers for filtering")
+        elif limit:
+            fetch_limit = limit
             logger.info(f"Limiting to {limit} papers")
         
+        # Fetch papers
         papers = []
-        for i, paper_id in enumerate(paper_ids, 1):
-            logger.info(f"Fetching paper {i}/{len(paper_ids)}: {paper_id}")
+        fetch_count = fetch_limit if fetch_limit else len(paper_ids)
+        for i, paper_id in enumerate(paper_ids[:fetch_count], 1):
+            logger.info(f"Fetching paper {i}/{fetch_count}: {paper_id}")
             paper_info = self.get_paper_info(paper_id)
             if paper_info:
                 papers.append(paper_info)
+        
+        # Apply search filter if provided
+        if search_query:
+            papers = self._filter_papers(papers, search_query)
+            logger.info(f"After filtering: {len(papers)} papers match query '{search_query}'")
+        
+        # Apply limit after filtering
+        if limit and len(papers) > limit:
+            papers = papers[:limit]
         
         return papers
 

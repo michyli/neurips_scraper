@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -12,8 +12,9 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         padding: 20px;
@@ -49,6 +50,40 @@
         margin-bottom: 30px;
       }
 
+      .mode-toggle {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: center;
+      }
+
+      .mode-btn {
+        padding: 10px 24px;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .mode-btn.active {
+        background: #667eea;
+        color: white;
+      }
+
+      .mode-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .mode-btn:focus {
+        outline: 3px solid rgba(102, 126, 234, 0.5);
+        outline-offset: 2px;
+      }
+
       .search-box {
         position: relative;
         margin-bottom: 25px;
@@ -66,6 +101,11 @@
 
       #searchInput:focus {
         border-color: #667eea;
+      }
+
+      #searchInput:disabled {
+        background: #f5f5f5;
+        cursor: not-allowed;
       }
 
       .conference-buttons {
@@ -100,6 +140,11 @@
         color: white;
       }
 
+      .conf-btn:focus {
+        outline: 3px solid rgba(102, 126, 234, 0.5);
+        outline-offset: 2px;
+      }
+
       .search-btn {
         width: 100%;
         padding: 15px;
@@ -113,7 +158,7 @@
         transition: transform 0.3s;
       }
 
-      .search-btn:hover {
+      .search-btn:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
       }
@@ -121,6 +166,11 @@
       .search-btn:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+      }
+
+      .search-btn:focus {
+        outline: 3px solid rgba(102, 126, 234, 0.5);
+        outline-offset: 2px;
       }
 
       .results-section {
@@ -133,6 +183,31 @@
 
       .results-section.show {
         display: block;
+      }
+
+      .stats-bar {
+        display: flex;
+        justify-content: space-around;
+        padding: 15px;
+        background: #f8f8ff;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .stat-label {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 5px;
       }
 
       .results-header {
@@ -183,15 +258,51 @@
         margin-bottom: 10px;
       }
 
+      .paper-keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0;
+      }
+
+      .keyword-tag {
+        padding: 4px 10px;
+        background: #f0f0ff;
+        color: #667eea;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: 500;
+      }
+
       .paper-abstract {
         color: #555;
         line-height: 1.6;
         margin-bottom: 12px;
+        position: relative;
+      }
+
+      .paper-abstract.collapsed {
+        max-height: 4.8em;
+        overflow: hidden;
+      }
+
+      .expand-btn {
+        color: #667eea;
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: 600;
+        margin: 5px 0 10px 0;
+        display: inline-block;
+      }
+
+      .expand-btn:hover {
+        text-decoration: underline;
       }
 
       .paper-links {
         display: flex;
         gap: 10px;
+        flex-wrap: wrap;
       }
 
       .paper-link {
@@ -206,6 +317,11 @@
 
       .paper-link:hover {
         background: #764ba2;
+      }
+
+      .paper-link:focus {
+        outline: 3px solid rgba(102, 126, 234, 0.5);
+        outline-offset: 2px;
       }
 
       .loading {
@@ -238,6 +354,192 @@
         border-radius: 8px;
         font-size: 1em;
       }
+
+      .year-selector select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .viz-link {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        border: 2px solid white;
+        transition: all 0.3s;
+        font-weight: 600;
+      }
+
+      .viz-link:hover {
+        background: white;
+        color: #667eea;
+        transform: translateY(-2px);
+      }
+
+      .viz-link:focus {
+        outline: 3px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 2px;
+      }
+
+      .similar-btn {
+        padding: 6px 14px;
+        background: #f0f0ff;
+        color: #667eea;
+        border: 1px solid #667eea;
+        border-radius: 15px;
+        font-size: 0.85em;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+        display: inline-block;
+      }
+
+      .similar-btn:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .similar-papers {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+        display: none;
+      }
+
+      .similar-papers.show {
+        display: block;
+      }
+
+      .similar-papers h4 {
+        color: #667eea;
+        font-size: 1em;
+        margin-bottom: 10px;
+      }
+
+      .similar-paper-item {
+        padding: 10px;
+        background: #f8f8ff;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 1px solid transparent;
+      }
+
+      .similar-paper-item:hover {
+        border-color: #667eea;
+        transform: translateX(5px);
+      }
+
+      .similar-paper-title {
+        font-size: 0.9em;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .similar-paper-score {
+        font-size: 0.75em;
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      /* Topic Bubbles */
+      .topic-overview {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        margin-bottom: 30px;
+        display: none;
+      }
+
+      .topic-overview.show {
+        display: block;
+      }
+
+      .topic-overview h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+
+      .topic-bubbles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+        padding: 20px 0;
+      }
+
+      .topic-bubble {
+        position: relative;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 15px;
+        text-align: center;
+      }
+
+      .topic-bubble:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      }
+
+      .topic-bubble:focus {
+        outline: 3px solid rgba(0, 0, 0, 0.3);
+        outline-offset: 3px;
+      }
+
+      .topic-bubble-name {
+        font-weight: 600;
+        font-size: 0.9em;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        margin-bottom: 5px;
+      }
+
+      .topic-bubble-count {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .topic-filter-active {
+        background: white;
+        border-radius: 10px;
+        padding: 10px 20px;
+        margin-bottom: 15px;
+        display: none;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .topic-filter-active.show {
+        display: flex;
+      }
+
+      .clear-topic-btn {
+        padding: 5px 15px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9em;
+      }
+
+      .clear-topic-btn:hover {
+        background: #764ba2;
+      }
     </style>
   </head>
   <body>
@@ -245,102 +547,750 @@
       <header>
         <h1>AI Paper Trails</h1>
         <p class="subtitle">Explore papers from top AI/ML/NLP conferences</p>
+        <a href="visualize.html" class="viz-link">🌌 3D Visualization</a>
       </header>
 
+      <!-- Topic Overview Section -->
+      <div class="topic-overview" id="topicOverview">
+        <h2>📊 Topic Overview</h2>
+        <p style="color: #666; margin-bottom: 20px">
+          Click a topic bubble to filter papers
+        </p>
+        <div class="topic-bubbles" id="topicBubbles"></div>
+      </div>
+
       <div class="search-section">
+        <div class="topic-filter-active" id="topicFilterActive">
+          <span>📌 Filtered by: <strong id="activeTopicName"></strong></span>
+          <button class="clear-topic-btn" id="clearTopicBtn">
+            Clear Filter
+          </button>
+        </div>
+
+        <div
+          class="mode-toggle"
+          role="group"
+          aria-label="Search mode selection"
+        >
+          <button class="mode-btn active" id="searchMode" aria-pressed="true">
+            🔍 Search
+          </button>
+          <button class="mode-btn" id="browseMode" aria-pressed="false">
+            📚 Browse
+          </button>
+        </div>
+
         <div class="search-box">
           <input
             type="text"
             id="searchInput"
             placeholder="Search papers by title, author, or keywords..."
+            aria-label="Search papers"
           />
         </div>
 
         <div class="year-selector">
           <label for="yearSelect">Year:</label>
-          <select id="yearSelect">
-            <option value="2024">2024</option>
+          <select id="yearSelect" aria-label="Select conference year">
+            <option value="2024" selected>2024</option>
             <option value="2023">2023</option>
             <option value="2022">2022</option>
             <option value="2021">2021</option>
           </select>
         </div>
 
-        <div class="conference-buttons">
-          <button class="conf-btn" data-conf="neurips">NeurIPS</button>
-          <button class="conf-btn" data-conf="icml">ICML</button>
-          <button class="conf-btn" data-conf="iclr">ICLR</button>
-          <button class="conf-btn" data-conf="acl">ACL</button>
-          <button class="conf-btn" data-conf="emnlp">EMNLP</button>
-          <button class="conf-btn" data-conf="naacl">NAACL</button>
-          <button class="conf-btn" data-conf="eacl">EACL</button>
-          <button class="conf-btn" data-conf="coling">COLING</button>
+        <div
+          class="conference-buttons"
+          role="group"
+          aria-label="Conference selection"
+        >
+          <button class="conf-btn" data-conf="neurips" aria-pressed="false">
+            NeurIPS
+          </button>
+          <button class="conf-btn" data-conf="icml" aria-pressed="false">
+            ICML
+          </button>
+          <button class="conf-btn" data-conf="iclr" aria-pressed="false">
+            ICLR
+          </button>
+          <button class="conf-btn" data-conf="acl" aria-pressed="false">
+            ACL
+          </button>
+          <button class="conf-btn" data-conf="emnlp" aria-pressed="false">
+            EMNLP
+          </button>
+          <button class="conf-btn" data-conf="naacl" aria-pressed="false">
+            NAACL
+          </button>
+          <button class="conf-btn" data-conf="eacl" aria-pressed="false">
+            EACL
+          </button>
+          <button class="conf-btn" data-conf="coling" aria-pressed="false">
+            COLING
+          </button>
         </div>
 
         <button class="search-btn" id="searchBtn">Search Papers</button>
       </div>
 
       <div class="results-section" id="resultsSection">
-        <div class="results-header">
-          <div class="results-count" id="resultsCount"></div>
+        <div class="stats-bar" id="statsBar" style="display: none">
+          <div class="stat-item">
+            <div class="stat-number" id="statTotal" aria-label="Total papers">
+              0
+            </div>
+            <div class="stat-label">Papers</div>
+          </div>
+          <div class="stat-item">
+            <div
+              class="stat-number"
+              id="statConference"
+              aria-label="Conference name"
+            >
+              -
+            </div>
+            <div class="stat-label">Conference</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" id="statYear" aria-label="Conference year">
+              -
+            </div>
+            <div class="stat-label">Year</div>
+          </div>
         </div>
-        <div id="resultsContainer"></div>
+
+        <div class="results-header">
+          <div class="results-count" id="resultsCount" aria-live="polite"></div>
+        </div>
+        <div id="resultsContainer" role="list" aria-label="Paper results"></div>
       </div>
     </div>
 
     <script>
       const API_URL = "http://localhost:8000";
+      const FETCH_TIMEOUT = 30000; // 30 second timeout
       let selectedConference = null;
+      let currentMode = "search";
+      let isLoading = false; // Prevent double-clicks
+      let allPapers = []; // Store all papers for similarity calculation
+      let activeTopic = null; // Currently selected topic filter
+      let filteredPapers = []; // Papers filtered by topic
 
-      // Conference button click handlers
+      // HTML escape function to prevent XSS
+      function escapeHtml(text) {
+        if (!text) return "";
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Safe array check and conversion
+      function safeArray(value) {
+        return Array.isArray(value) ? value : [];
+      }
+
+      // Validate and sanitize URL
+      function sanitizeUrl(url) {
+        if (!url) return "";
+        try {
+          const urlObj = new URL(url);
+          if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+            return "";
+          }
+          return url;
+        } catch {
+          return "";
+        }
+      }
+
+      // Format number with thousands separator
+      function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      // Topic detection and classification (reused from 3D visualization)
+      const TOPIC_CATEGORIES = {
+        "Computer Vision": {
+          color: "#ff6b6b",
+          keywords: [
+            "vision",
+            "image",
+            "visual",
+            "video",
+            "object detection",
+            "segmentation",
+            "cnn",
+          ],
+        },
+        "NLP & Language": {
+          color: "#4ecdc4",
+          keywords: [
+            "nlp",
+            "language",
+            "text",
+            "translation",
+            "bert",
+            "gpt",
+            "transformer",
+            "linguistic",
+          ],
+        },
+        "Reinforcement Learning": {
+          color: "#95e1d3",
+          keywords: [
+            "reinforce",
+            "rl",
+            "agent",
+            "policy",
+            "reward",
+            "q-learning",
+            "mdp",
+          ],
+        },
+        "Graph & Network": {
+          color: "#f38181",
+          keywords: ["graph", "network", "node", "edge", "gnn", "social"],
+        },
+        "Generative Models": {
+          color: "#feca57",
+          keywords: [
+            "generation",
+            "generative",
+            "gan",
+            "vae",
+            "diffusion",
+            "synthesis",
+          ],
+        },
+        "Deep Learning": {
+          color: "#667eea",
+          keywords: [
+            "neural",
+            "deep learning",
+            "architecture",
+            "optimization",
+            "training",
+          ],
+        },
+      };
+
+      function getTopicForPaper(paper) {
+        if (!paper.keywords || paper.keywords.length === 0) {
+          return "Other Topics";
+        }
+
+        const keywords = paper.keywords.map((k) => k.toLowerCase()).join(" ");
+        const title = (paper.title || "").toLowerCase();
+        const abstract = (paper.abstract || "").toLowerCase();
+        const fullText = `${keywords} ${title} ${abstract}`;
+
+        // Check each topic category
+        for (const [topicName, topicInfo] of Object.entries(TOPIC_CATEGORIES)) {
+          if (topicInfo.keywords.some((kw) => fullText.includes(kw))) {
+            return topicName;
+          }
+        }
+
+        return "Other Topics";
+      }
+
+      function getTopicColor(topicName) {
+        return TOPIC_CATEGORIES[topicName]?.color || "#888888";
+      }
+
+      function groupPapersByTopic(papers) {
+        const topicGroups = {};
+
+        papers.forEach((paper) => {
+          const topic = getTopicForPaper(paper);
+          if (!topicGroups[topic]) {
+            topicGroups[topic] = [];
+          }
+          topicGroups[topic].push(paper);
+        });
+
+        return topicGroups;
+      }
+
+      function createTopicBubbles(papers) {
+        const topicGroups = groupPapersByTopic(papers);
+        const topicBubbles = document.getElementById("topicBubbles");
+        topicBubbles.innerHTML = "";
+
+        // Sort topics by paper count
+        const sortedTopics = Object.entries(topicGroups).sort(
+          (a, b) => b[1].length - a[1].length,
+        );
+
+        sortedTopics.forEach(([topicName, topicPapers]) => {
+          const count = topicPapers.length;
+          const color = getTopicColor(topicName);
+
+          // Calculate bubble size based on paper count (min 80px, max 200px)
+          const minSize = 80;
+          const maxSize = 200;
+          const maxCount = Math.max(
+            ...Object.values(topicGroups).map((g) => g.length),
+          );
+          const size = minSize + (maxSize - minSize) * (count / maxCount);
+
+          const bubble = document.createElement("div");
+          bubble.className = "topic-bubble";
+          bubble.style.width = `${size}px`;
+          bubble.style.height = `${size}px`;
+          bubble.style.background = color;
+          bubble.tabIndex = 0;
+          bubble.setAttribute("role", "button");
+          bubble.setAttribute(
+            "aria-label",
+            `Filter by ${topicName}, ${count} papers`,
+          );
+
+          const nameDiv = document.createElement("div");
+          nameDiv.className = "topic-bubble-name";
+          nameDiv.textContent = topicName;
+
+          const countDiv = document.createElement("div");
+          countDiv.className = "topic-bubble-count";
+          countDiv.textContent = count;
+
+          bubble.appendChild(nameDiv);
+          bubble.appendChild(countDiv);
+
+          // Click handler
+          bubble.addEventListener("click", () =>
+            filterByTopic(topicName, topicPapers),
+          );
+          bubble.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              filterByTopic(topicName, topicPapers);
+            }
+          });
+
+          topicBubbles.appendChild(bubble);
+        });
+
+        // Show topic overview
+        document.getElementById("topicOverview").classList.add("show");
+      }
+
+      function filterByTopic(topicName, papers) {
+        activeTopic = topicName;
+        filteredPapers = papers;
+
+        // Update UI to show active filter
+        document.getElementById("activeTopicName").textContent = topicName;
+        document.getElementById("topicFilterActive").classList.add("show");
+
+        // Display filtered papers
+        displayPapers(
+          papers,
+          selectedConference?.toUpperCase() || "Conference",
+          parseInt(document.getElementById("yearSelect").value),
+        );
+
+        // Scroll to results
+        document
+          .getElementById("resultsSection")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      function clearTopicFilter() {
+        activeTopic = null;
+        filteredPapers = [];
+        document.getElementById("topicFilterActive").classList.remove("show");
+
+        // Re-display all papers
+        if (allPapers.length > 0) {
+          displayPapers(
+            allPapers,
+            selectedConference?.toUpperCase() || "Conference",
+            parseInt(document.getElementById("yearSelect").value),
+          );
+        }
+      }
+
+      // Clear topic filter button
+      document
+        .getElementById("clearTopicBtn")
+        .addEventListener("click", clearTopicFilter);
+
+      // Calculate similarity between two papers
+      function calculateSimilarity(paper1, paper2) {
+        let score = 0;
+
+        // Keyword overlap (weight: 0.5)
+        const kw1 = new Set(
+          (paper1.keywords || []).map((k) => k.toLowerCase()),
+        );
+        const kw2 = new Set(
+          (paper2.keywords || []).map((k) => k.toLowerCase()),
+        );
+        const kwIntersection = [...kw1].filter((x) => kw2.has(x));
+        const kwUnion = new Set([...kw1, ...kw2]);
+        if (kwUnion.size > 0) {
+          score += (kwIntersection.length / kwUnion.size) * 0.5;
+        }
+
+        // Author overlap (weight: 0.2)
+        const auth1 = new Set(
+          (paper1.authors || []).map((a) => a.toLowerCase()),
+        );
+        const auth2 = new Set(
+          (paper2.authors || []).map((a) => a.toLowerCase()),
+        );
+        const authIntersection = [...auth1].filter((x) => auth2.has(x));
+        if (authIntersection.length > 0) {
+          score += 0.2;
+        }
+
+        // Abstract text similarity (weight: 0.3)
+        if (
+          paper1.abstract &&
+          paper2.abstract &&
+          paper1.abstract !== "N/A" &&
+          paper2.abstract !== "N/A"
+        ) {
+          const words1 = new Set(
+            paper1.abstract
+              .toLowerCase()
+              .split(/\s+/)
+              .filter((w) => w.length > 4),
+          );
+          const words2 = new Set(
+            paper2.abstract
+              .toLowerCase()
+              .split(/\s+/)
+              .filter((w) => w.length > 4),
+          );
+          const wordIntersection = [...words1].filter((x) => words2.has(x));
+          const wordUnion = new Set([...words1, ...words2]);
+          if (wordUnion.size > 0) {
+            score += (wordIntersection.length / wordUnion.size) * 0.3;
+          }
+        }
+
+        return score;
+      }
+
+      // Get similar papers
+      function getSimilarPapers(targetPaper, papers, topN = 5) {
+        return papers
+          .filter((p) => p !== targetPaper)
+          .map((p) => ({
+            paper: p,
+            similarity: calculateSimilarity(targetPaper, p),
+          }))
+          .filter((s) => s.similarity > 0.1) // Minimum 10% similarity
+          .sort((a, b) => b.similarity - a.similarity)
+          .slice(0, topN);
+      }
+
+      // Show similar papers
+      function showSimilarPapers(index, paper) {
+        const similarDiv = document.getElementById(`similar-${index}`);
+
+        if (similarDiv.classList.contains("show")) {
+          similarDiv.classList.remove("show");
+          return;
+        }
+
+        const similarPapers = getSimilarPapers(paper, allPapers, 5);
+
+        if (similarPapers.length === 0) {
+          similarDiv.innerHTML =
+            '<p style="color: #999; font-size: 0.9em;">No similar papers found.</p>';
+        } else {
+          similarDiv.innerHTML = `
+                    <h4>💡 You might also like</h4>
+                    ${similarPapers
+                      .map(
+                        (sim, idx) => `
+                        <div class="similar-paper-item" onclick="scrollToPaper('${escapeHtml(sim.paper.title || "")}')">
+                            <div class="similar-paper-title">${idx + 1}. ${escapeHtml(sim.paper.title || "Untitled")}</div>
+                            <div class="similar-paper-score">${(sim.similarity * 100).toFixed(0)}% similarity</div>
+                        </div>
+                    `,
+                      )
+                      .join("")}
+                `;
+        }
+
+        similarDiv.classList.add("show");
+      }
+
+      // Scroll to paper by title
+      function scrollToPaper(title) {
+        const cards = document.querySelectorAll(".paper-card");
+        for (const card of cards) {
+          const cardTitle = card.querySelector(".paper-title");
+          if (cardTitle && cardTitle.textContent === title) {
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+            card.style.border = "2px solid #667eea";
+            setTimeout(() => {
+              card.style.border = "1px solid #e0e0e0";
+            }, 2000);
+            break;
+          }
+        }
+      }
+
+      // Fetch with timeout
+      async function fetchWithTimeout(url, timeout = FETCH_TIMEOUT) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        try {
+          const response = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          return response;
+        } catch (error) {
+          clearTimeout(timeoutId);
+          if (error.name === "AbortError") {
+            throw new Error(
+              "Request timeout - server took too long to respond",
+            );
+          }
+          throw error;
+        }
+      }
+
+      // Mode toggle handlers
+      function setSearchMode() {
+        currentMode = "search";
+        document.getElementById("searchMode").classList.add("active");
+        document.getElementById("browseMode").classList.remove("active");
+        document
+          .getElementById("searchMode")
+          .setAttribute("aria-pressed", "true");
+        document
+          .getElementById("browseMode")
+          .setAttribute("aria-pressed", "false");
+        document.getElementById("searchInput").disabled = false;
+        document.getElementById("searchInput").placeholder =
+          "Search papers by title, author, or keywords...";
+        document.getElementById("searchBtn").textContent = "Search Papers";
+      }
+
+      function setBrowseMode() {
+        currentMode = "browse";
+        document.getElementById("browseMode").classList.add("active");
+        document.getElementById("searchMode").classList.remove("active");
+        document
+          .getElementById("browseMode")
+          .setAttribute("aria-pressed", "true");
+        document
+          .getElementById("searchMode")
+          .setAttribute("aria-pressed", "false");
+        document.getElementById("searchInput").disabled = true;
+        document.getElementById("searchInput").placeholder =
+          "Browse mode - select conference to explore recent papers";
+        document.getElementById("searchInput").value = "";
+        document.getElementById("searchBtn").textContent = "Browse Papers";
+      }
+
+      document
+        .getElementById("searchMode")
+        .addEventListener("click", setSearchMode);
+      document
+        .getElementById("browseMode")
+        .addEventListener("click", setBrowseMode);
+
+      // Keyboard support for mode buttons
+      document.getElementById("searchMode").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setSearchMode();
+        }
+      });
+
+      document.getElementById("browseMode").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setBrowseMode();
+        }
+      });
+
+      // Conference button handlers
+      function selectConference(btn) {
+        if (btn.classList.contains("active")) {
+          btn.classList.remove("active");
+          btn.setAttribute("aria-pressed", "false");
+          selectedConference = null;
+        } else {
+          document.querySelectorAll(".conf-btn").forEach((b) => {
+            b.classList.remove("active");
+            b.setAttribute("aria-pressed", "false");
+          });
+          btn.classList.add("active");
+          btn.setAttribute("aria-pressed", "true");
+          selectedConference = btn.dataset.conf;
+
+          // Auto-fetch in browse mode
+          if (currentMode === "browse" && !isLoading) {
+            document.getElementById("searchBtn").click();
+          }
+        }
+      }
+
       document.querySelectorAll(".conf-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          // Toggle selection
-          if (btn.classList.contains("active")) {
-            btn.classList.remove("active");
-            selectedConference = null;
-          } else {
-            // Remove active from all buttons
-            document
-              .querySelectorAll(".conf-btn")
-              .forEach((b) => b.classList.remove("active"));
-            // Add active to clicked button
-            btn.classList.add("active");
-            selectedConference = btn.dataset.conf;
+        btn.addEventListener("click", () => selectConference(btn));
+
+        // Keyboard support
+        btn.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            selectConference(btn);
           }
         });
       });
 
-      // Search button click handler
+      // Toggle abstract expansion
+      function toggleAbstract(index) {
+        const abstractEl = document.getElementById(`abstract-${index}`);
+        const expandBtn = document.getElementById(`expand-${index}`);
+
+        if (abstractEl && expandBtn) {
+          if (abstractEl.classList.contains("collapsed")) {
+            abstractEl.classList.remove("collapsed");
+            expandBtn.textContent = "Show less ▲";
+            expandBtn.setAttribute("aria-expanded", "true");
+          } else {
+            abstractEl.classList.add("collapsed");
+            expandBtn.textContent = "Show more ▼";
+            expandBtn.setAttribute("aria-expanded", "false");
+          }
+        }
+      }
+
+      // Create paper card HTML
+      function createPaperCard(paper, index, conferenceName, year) {
+        const hasAbstract =
+          paper.abstract &&
+          paper.abstract !== "N/A" &&
+          paper.abstract.length > 0;
+        const hasLongAbstract = hasAbstract && paper.abstract.length > 300;
+
+        const authors = safeArray(paper.authors);
+        const keywords = safeArray(paper.keywords);
+
+        const title = escapeHtml(paper.title) || "Untitled";
+        const abstract = hasAbstract
+          ? escapeHtml(paper.abstract)
+          : "No abstract available";
+        const authorList =
+          authors.length > 0
+            ? escapeHtml(authors.slice(0, 5).join(", ")) +
+              (authors.length > 5 ? ", et al." : "")
+            : "No authors listed";
+
+        const card = document.createElement("div");
+        card.className = "paper-card";
+        card.setAttribute("role", "listitem");
+
+        let html = `
+                <div class="paper-conference">${escapeHtml(conferenceName)} ${year}</div>
+                <h3 class="paper-title">${title}</h3>
+                <div class="paper-authors">${authorList}</div>
+            `;
+
+        if (keywords.length > 0) {
+          html += '<div class="paper-keywords">';
+          keywords.slice(0, 6).forEach((kw) => {
+            html += `<span class="keyword-tag">${escapeHtml(kw)}</span>`;
+          });
+          html += "</div>";
+        }
+
+        html += `<div class="paper-abstract ${hasLongAbstract ? "collapsed" : ""}" id="abstract-${index}">${abstract}</div>`;
+
+        if (hasLongAbstract) {
+          html += `<div class="expand-btn" id="expand-${index}" role="button" tabindex="0" aria-expanded="false">Show more ▼</div>`;
+        }
+
+        html += '<div class="paper-links">';
+        const pdfUrl = sanitizeUrl(paper.pdf_url);
+        const forumUrl = sanitizeUrl(paper.forum_url);
+        const anthologyUrl = sanitizeUrl(paper.anthology_url);
+
+        if (pdfUrl) {
+          html += `<a href="${pdfUrl}" target="_blank" rel="noopener noreferrer" class="paper-link">📄 PDF</a>`;
+        }
+        if (forumUrl) {
+          html += `<a href="${forumUrl}" target="_blank" rel="noopener noreferrer" class="paper-link">💬 OpenReview</a>`;
+        }
+        if (anthologyUrl) {
+          html += `<a href="${anthologyUrl}" target="_blank" rel="noopener noreferrer" class="paper-link">📚 ACL Anthology</a>`;
+        }
+        html += "</div>";
+
+        // Add similar papers button
+        html += `
+                <button class="similar-btn" id="similar-btn-${index}">🔍 Find Similar Papers</button>
+                <div class="similar-papers" id="similar-${index}"></div>
+            `;
+
+        card.innerHTML = html;
+
+        if (hasLongAbstract) {
+          const expandBtn = card.querySelector(`#expand-${index}`);
+          if (expandBtn) {
+            expandBtn.addEventListener("click", () => toggleAbstract(index));
+            expandBtn.addEventListener("keydown", (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleAbstract(index);
+              }
+            });
+          }
+        }
+
+        // Add event listener for similar papers button
+        const similarBtn = card.querySelector(`#similar-btn-${index}`);
+        if (similarBtn) {
+          similarBtn.addEventListener("click", () =>
+            showSimilarPapers(index, paper),
+          );
+        }
+
+        return card;
+      }
+
+      // Search/Browse button handler
       document
         .getElementById("searchBtn")
         .addEventListener("click", async () => {
-          const searchQuery = document
-            .getElementById("searchInput")
-            .value.trim();
+          if (isLoading) return; // Prevent double-clicks
+
+          const searchQuery =
+            currentMode === "search"
+              ? document.getElementById("searchInput").value.trim()
+              : "";
           const year = document.getElementById("yearSelect").value;
           const searchBtn = document.getElementById("searchBtn");
           const resultsSection = document.getElementById("resultsSection");
           const resultsContainer = document.getElementById("resultsContainer");
           const resultsCount = document.getElementById("resultsCount");
+          const statsBar = document.getElementById("statsBar");
 
           if (!selectedConference) {
             alert("Please select a conference first");
             return;
           }
 
-          // Show loading
+          isLoading = true;
           searchBtn.disabled = true;
-          searchBtn.textContent = "Searching...";
+          const originalBtnText = searchBtn.textContent;
+          searchBtn.textContent =
+            currentMode === "browse" ? "Loading..." : "Searching...";
           resultsSection.classList.add("show");
           resultsContainer.innerHTML =
             '<div class="loading">Loading papers...</div>';
 
           try {
-            const url = `${API_URL}/papers/${selectedConference}/${year}?limit=20${
-              searchQuery ? "&search=" + encodeURIComponent(searchQuery) : ""
-            }`;
-            const response = await fetch(url);
+            const url = `${API_URL}/papers/${selectedConference}/${year}?limit=100${searchQuery ? "&search=" + encodeURIComponent(searchQuery) : ""}`;
+            const response = await fetchWithTimeout(url);
 
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
@@ -348,65 +1298,50 @@
 
             const data = await response.json();
 
-            // Update results count
-            resultsCount.textContent = `Found ${data.count} papers from ${data.conference_name} ${year}`;
+            if (
+              !data ||
+              typeof data.count !== "number" ||
+              !Array.isArray(data.papers)
+            ) {
+              throw new Error("Invalid response format from server");
+            }
 
-            // Display results
+            // Store papers globally for similarity calculations
+            allPapers = data.papers;
+
+            // Create topic bubbles for browsing
+            createTopicBubbles(data.papers);
+
+            statsBar.style.display = "flex";
+            document.getElementById("statTotal").textContent = formatNumber(
+              data.count,
+            );
+            document.getElementById("statConference").textContent = escapeHtml(
+              data.conference_name || "-",
+            );
+            document.getElementById("statYear").textContent = year;
+
+            const modeText = currentMode === "browse" ? "Browsing" : "Found";
+            resultsCount.textContent = `${modeText} ${formatNumber(data.count)} papers from ${escapeHtml(data.conference_name || "Unknown")} ${year}`;
+
             if (data.papers.length === 0) {
               resultsContainer.innerHTML =
                 '<p class="loading">No papers found. Try a different search or conference.</p>';
             } else {
-              resultsContainer.innerHTML = data.papers
-                .map(
-                  (paper) => `
-                        <div class="paper-card">
-                            <div class="paper-conference">${
-                              data.conference_name
-                            } ${year}</div>
-                            <h3 class="paper-title">${
-                              paper.title || "Untitled"
-                            }</h3>
-                            <div class="paper-authors">
-                                ${
-                                  paper.authors && paper.authors.length > 0
-                                    ? paper.authors.slice(0, 5).join(", ") +
-                                      (paper.authors.length > 5
-                                        ? ", et al."
-                                        : "")
-                                    : "No authors listed"
-                                }
-                            </div>
-                            <div class="paper-abstract">
-                                ${
-                                  paper.abstract && paper.abstract !== "N/A"
-                                    ? paper.abstract.substring(0, 300) +
-                                      (paper.abstract.length > 300 ? "..." : "")
-                                    : "No abstract available"
-                                }
-                            </div>
-                            <div class="paper-links">
-                                ${
-                                  paper.pdf_url
-                                    ? `<a href="${paper.pdf_url}" target="_blank" class="paper-link">PDF</a>`
-                                    : ""
-                                }
-                                ${
-                                  paper.forum_url
-                                    ? `<a href="${paper.forum_url}" target="_blank" class="paper-link">OpenReview</a>`
-                                    : ""
-                                }
-                                ${
-                                  paper.anthology_url
-                                    ? `<a href="${paper.anthology_url}" target="_blank" class="paper-link">ACL Anthology</a>`
-                                    : ""
-                                }
-                            </div>
-                        </div>
-                    `
-                )
-                .join("");
+              resultsContainer.innerHTML = "";
+
+              data.papers.forEach((paper, index) => {
+                const card = createPaperCard(
+                  paper,
+                  index,
+                  data.conference_name,
+                  year,
+                );
+                resultsContainer.appendChild(card);
+              });
             }
           } catch (error) {
+            statsBar.style.display = "none";
             resultsContainer.innerHTML = `
                     <div class="error">
                         <strong>Error:</strong> ${error.message}
@@ -415,16 +1350,22 @@
                     </div>
                 `;
           } finally {
+            isLoading = false;
             searchBtn.disabled = false;
-            searchBtn.textContent = "Search Papers";
+            searchBtn.textContent = originalBtnText;
           }
         });
 
-      // Allow Enter key to trigger search
+      // Enter key to search
       document
         .getElementById("searchInput")
-        .addEventListener("keypress", (e) => {
-          if (e.key === "Enter" && selectedConference) {
+        .addEventListener("keydown", (e) => {
+          if (
+            e.key === "Enter" &&
+            selectedConference &&
+            currentMode === "search" &&
+            !isLoading
+          ) {
             document.getElementById("searchBtn").click();
           }
         });

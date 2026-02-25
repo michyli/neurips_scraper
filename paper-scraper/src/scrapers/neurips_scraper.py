@@ -69,7 +69,7 @@ class NeurIPSScraper:
         logger.info(f"Fetching submissions for venue: {venue_id}, limit: {limit}")
         url = f"{self.base_url}/notes"
         params = {
-            'invitation': f'{venue_id}/-/Submission',
+            'invitations': f'{venue_id}/-/Submission',
             'details': 'replyCount,invitation,original',
             'limit': limit
         }
