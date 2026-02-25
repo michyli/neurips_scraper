@@ -8,6 +8,7 @@ import requests
 import json
 import logging
 import time
+import urllib.parse
 from typing import Dict, List, Optional
 from datetime import datetime
 from requests.adapters import HTTPAdapter
@@ -110,16 +111,14 @@ class ConferenceScraper:
             List of paper dictionaries
         """
         logger.info(f"Fetching submissions for venue: {venue_id}, limit: {limit}, offset: {offset}")
-        url = f"{self.base_url}/notes"
-        params = {
-            'content.venueid': venue_id,
-            'limit': limit,
-            'offset': offset
-        }
+        # Build URL manually to ensure content.venueid is encoded correctly
+        encoded_venue = urllib.parse.quote(venue_id, safe='')
+        url = f"{self.base_url}/notes?content.venueid={encoded_venue}&limit={limit}&offset={offset}"
+        logger.info(f"Request URL: {url}")
         
         try:
             self._rate_limit()
-            response = self.session.get(url, params=params, timeout=30)
+            response = self.session.get(url, timeout=30)
             response.raise_for_status()
             data = response.json()
             papers = data.get('notes', [])
