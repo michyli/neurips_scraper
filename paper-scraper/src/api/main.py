@@ -4,6 +4,8 @@ FastAPI backend for paper scraper
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from typing import List, Optional
 import sys
 import os
@@ -80,14 +82,25 @@ def save_to_cache(cache_key: str, data):
     }
 
 
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
+
+
 @app.get("/")
 def root():
-    """Root endpoint"""
-    return {
-        "message": "Paper Scraper API",
-        "version": "0.1.0",
-        "docs": "/docs"
-    }
+    """Serve the main frontend page"""
+    index_path = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
+    return {"message": "Paper Scraper API", "version": "0.1.0", "docs": "/docs"}
+
+
+@app.get("/visualize")
+def visualize():
+    """Serve the 3D visualization page"""
+    viz_path = os.path.join(FRONTEND_DIR, "visualize.html")
+    if os.path.exists(viz_path):
+        return FileResponse(viz_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Visualization page not found")
 
 
 @app.get("/conferences")
