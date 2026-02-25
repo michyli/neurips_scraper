@@ -103,6 +103,27 @@ def visualize():
     raise HTTPException(status_code=404, detail="Visualization page not found")
 
 
+@app.get("/debug/openreview")
+def debug_openreview():
+    """Test OpenReview API connectivity directly"""
+    import urllib.parse
+    import requests as req
+    venue_id = "NeurIPS.cc/2024/Conference"
+    encoded = urllib.parse.quote(venue_id, safe='')
+    url = f"https://api2.openreview.net/notes?content.venueid={encoded}&limit=2"
+    try:
+        r = req.get(url, timeout=15)
+        return {
+            "url": url,
+            "status_code": r.status_code,
+            "response_keys": list(r.json().keys()) if r.ok else None,
+            "count": len(r.json().get("notes", [])) if r.ok else 0,
+            "error": None
+        }
+    except Exception as e:
+        return {"url": url, "error": str(e), "error_type": type(e).__name__}
+
+
 @app.get("/conferences")
 def list_conferences():
     """List all supported conferences"""
