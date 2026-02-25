@@ -28,12 +28,9 @@ app = FastAPI(
 # Example: allow_origins=["https://neurips.aipapertrails.com"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://michyli.github.io",
-        "https://neuripsscraper-production.up.railway.app",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
 
